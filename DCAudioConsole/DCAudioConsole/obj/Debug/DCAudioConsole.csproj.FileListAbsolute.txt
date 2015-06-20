@@ -1,0 +1,6 @@
+c:\users\adamst\documents\visual studio 2012\Projects\DCAudioConsole\DCAudioConsole\bin\Debug\DCAudioConsole.exe.config
+c:\users\adamst\documents\visual studio 2012\Projects\DCAudioConsole\DCAudioConsole\bin\Debug\DCAudioConsole.exe
+c:\users\adamst\documents\visual studio 2012\Projects\DCAudioConsole\DCAudioConsole\bin\Debug\DCAudioConsole.pdb
+c:\users\adamst\documents\visual studio 2012\Projects\DCAudioConsole\DCAudioConsole\obj\Debug\DCAudioConsole.csprojResolveAssemblyReference.cache
+c:\users\adamst\documents\visual studio 2012\Projects\DCAudioConsole\DCAudioConsole\obj\Debug\DCAudioConsole.exe
+c:\users\adamst\documents\visual studio 2012\Projects\DCAudioConsole\DCAudioConsole\obj\Debug\DCAudioConsole.pdb
