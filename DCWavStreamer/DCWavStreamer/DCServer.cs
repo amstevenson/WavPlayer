@@ -5,12 +5,14 @@ using System.Text;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Net;
+using DCWavStreamer.Audio;
 
 namespace DCWavStreamer
 {
     class DCServer
     {
         /// <summary>
+        /// 
         /// Member variables
         /// 
         /// m_dataBuffer   : retrieves the inbound request from the connecting client
@@ -23,6 +25,7 @@ namespace DCWavStreamer
         private static Socket       m_serverSocket;
 
         /// <summary>
+        /// 
         /// Constructor for a new DCServer, accepts a DCConfig structure as a parameters.
         /// The DCConfig structure dictates where the server should run, the port it should run on,
         /// the servers title and other information, such as the size of the input buffer.
@@ -69,8 +72,14 @@ namespace DCWavStreamer
 
         /// <summary>
         /// 
+        /// Defines a Callback to Accept a new connection to the server.  This works similar to how mutex locks
+        /// work in multi threaded applications.  The server will acquire the lock by ending its accept state, 
+        /// then it will add the new socket to the managed socket pool, start listening to that client for a request
+        /// and then it will finally allow new sockets to connect, this will fire recursively and shall listen
+        /// to all clients on each loop.
+        /// 
         /// </summary>
-        /// <param name="res"></param>
+        /// <param name="res">Pointer to the socket we are listening to</param>
         private static void AcceptCallback(IAsyncResult res)
         {
             try
@@ -88,33 +97,55 @@ namespace DCWavStreamer
 
         /// <summary>
         /// 
+        /// Defines a callback to receive data from the connected client socket.  The pointer passed in the Accept method
+        /// tells the server which socket it is listening on (this runs asynchronously as we listen to multiple sockets at once)
+        /// we are then able to pull the request from that socket into the readbuffer, allowing us to see what type 
+        /// of request is sent. This is normally an RTSP DESCRIBE request, from here we can determine what stream the
+        /// listening socket should read from.
+        /// 
         /// </summary>
         /// <param name="res"></param>
         private static void ReceiveCallback(IAsyncResult res)
         {
             try
             {
-                var socket = (Socket)res.AsyncState;
-                int data = socket.EndReceive(res);
+                // Get the pointer to our socket from the result, and then create a temporary buffer
+                // to pull the information from 
+                var socket    = (Socket)res.AsyncState;
+                int data      = socket.EndReceive(res);
                 var tmpBuffer = new byte[data];
 
+                // Copy the request data into the temp buffer (this is written to in accept callback from the connecting socket)
                 Array.Copy(m_dataBuffer, tmpBuffer, data);
 
-                string txt = Encoding.ASCII.GetString(tmpBuffer);
-                Console.WriteLine("Request from client: " + txt);
+                string request = Encoding.ASCII.GetString(tmpBuffer);
+                Console.WriteLine("Request from client: " + request);
 
-                for (int i = 0; i < 2000000; i++)
-                { }
-
-                if (txt.Contains("DESCRIBE"))
+                // See what type of RTSP request we recieve on our end, DESCRIBE means that the client is asking for
+                // the data at the specified resource i.e. rtsp://server.com/streams/streamX would respond with a PLAY request
+                // with a chunk of data from that stream at the current position.
+                if (request.Contains("DESCRIBE"))
                 {
-                    Console.WriteLine("Fetching the resource");
-                    SendChunk("playing to client", socket);
+                    Console.WriteLine("Fetching chunk from the requested stream...");
+                    try
+                    {
+                        // Convert the WAV chunk to a byte array and send it to the current socket, once the data
+                        // has been transmitted the socket will automatically end its sending state and start listening
+                        // for more data, this is how we set up our continuous stream from client to server...
+                        // Collect byte information from audio file
+                        ALawWaveStream waveStream = new ALawWaveStream("holdmusic.wav");
+                        byte[] byteChunk = waveStream.getByteChunk(0, 3);
+                        socket.BeginSend(byteChunk, 0, byteChunk.Length, SocketFlags.None, new AsyncCallback(SendCallback), socket);
+                        socket.BeginReceive(m_dataBuffer, 0, m_dataBuffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), socket);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
                 }
                 else
                 {
                     Console.WriteLine("Invalid resource :(");
-                    SendChunk("invalid request", socket);
                 }
             }
             catch (Exception e)
@@ -124,6 +155,10 @@ namespace DCWavStreamer
         }
 
         /// <summary>
+        /// 
+        /// Defines a callback for when a data is sent to a connected socket. This tells the server socket that the data in the buffer
+        /// has been sent and that the socket can start recieving data again. This will allow us to consitently send chunks to the
+        /// listening SIP application.
         /// 
         /// </summary>
         /// <param name="res"></param>
@@ -137,25 +172,6 @@ namespace DCWavStreamer
             catch (Exception e)
             {
                 Console.Write(e.Message);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="socket"></param>
-        private static void SendChunk(string message, Socket socket)
-        {
-            try
-            {
-                byte[] data = Encoding.ASCII.GetBytes(message);
-                socket.BeginSend(data, 0, data.Length, SocketFlags.None, new AsyncCallback(SendCallback), socket);
-                socket.BeginReceive(m_dataBuffer, 0, m_dataBuffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), socket);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
             }
         }
     }

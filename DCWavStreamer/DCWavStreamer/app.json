@@ -1,0 +1,13 @@
+﻿{
+	"version" : "1.0",
+	"publisher" : "Datacom Worldwide",
+	"streams" : [
+		{
+			"stream_name" : "stream1.dcw"
+		},
+		{
+			"stream_name" : "stream2.dcw",
+			"stream_songs" : "[./songs/song1.wav, ./songs/song2.wav]"
+		}
+	]
+}

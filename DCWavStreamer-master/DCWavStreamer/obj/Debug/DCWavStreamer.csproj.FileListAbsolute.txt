@@ -1,8 +1,0 @@
-C:\Users\Alex\Documents\Datacom\DCWavStreamer\DCWavStreamer\bin\Debug\DCWavStreamer.exe.config
-C:\Users\Alex\Documents\Datacom\DCWavStreamer\DCWavStreamer\obj\Debug\DCWavStreamer.csprojResolveAssemblyReference.cache
-C:\Users\Alex\Documents\Datacom\DCWavStreamer\DCWavStreamer\bin\Debug\DCWavStreamer.exe
-C:\Users\Alex\Documents\Datacom\DCWavStreamer\DCWavStreamer\bin\Debug\DCWavStreamer.pdb
-C:\Users\Alex\Documents\Datacom\DCWavStreamer\DCWavStreamer\obj\Debug\DCWavStreamer.exe
-C:\Users\Alex\Documents\Datacom\DCWavStreamer\DCWavStreamer\obj\Debug\DCWavStreamer.pdb
-C:\Users\Alex\Documents\Datacom\DCWavStreamer\DCWavStreamer\bin\Debug\NAudio.dll
-C:\Users\Alex\Documents\Datacom\DCWavStreamer\DCWavStreamer\bin\Debug\NAudio.xml
